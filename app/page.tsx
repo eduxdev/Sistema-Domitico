@@ -1,9 +1,11 @@
-import Image from "next/image";
+import Hero from "@/components/sections/Hero";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      
-    </div>
+    <main className="w-full min-h-screen overflow-x-hidden bg-black font-sans relative">
+      <div className="flex flex-col min-h-screen">
+        <Hero />
+      </div>
+    </main>
   );
 }
