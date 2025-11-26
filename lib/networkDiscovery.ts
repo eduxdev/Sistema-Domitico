@@ -59,10 +59,10 @@ export class NetworkDiscovery {
     }
   }
 
-  async sendCommandToDevice(): Promise<void> {
+  async sendCommandToDevice(_deviceIP: string, _command: Record<string, unknown>): Promise<void> {
     try {
       // En lugar de UDP, podríamos usar HTTP si el ESP32 tiene un servidor web
-      // Por ahora, método placeholder
+      // Por ahora, método placeholder - los parámetros se ignoran pero se mantienen para compatibilidad
       return Promise.resolve()
     } catch (error) {
       console.error('Error sending command to device:', error)
