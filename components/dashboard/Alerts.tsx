@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Bell, AlertTriangle, CheckCircle, Info } from 'lucide-react'
 
 interface Lectura {
@@ -139,12 +140,41 @@ export default function Alerts() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Alertas</h2>
-        <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-gray-500">Cargando alertas...</p>
-          </CardContent>
-        </Card>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Alertas de Mis Dispositivos</h2>
+            <p className="text-gray-500">Alertas de los dispositivos que has reclamado</p>
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-28" />
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="border-l-4">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-5 w-20" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     )
   }

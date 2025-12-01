@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Settings as SettingsIcon, Mail, TestTube, Bell, Clock, Shield } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -194,46 +195,6 @@ export default function SettingsPage() {
             <p className="text-xs text-gray-500">
               Para modificar tu perfil, contacta al administrador del sistema
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Seguridad</CardTitle>
-            <CardDescription>
-              Configuración de seguridad de tu cuenta
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="current-password">Contraseña Actual</Label>
-              <Input type="password" id="current-password" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Nueva Contraseña</Label>
-              <Input type="password" id="new-password" />
-            </div>
-            <Button className="w-full">Cambiar Contraseña</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Sistema</CardTitle>
-            <CardDescription>
-              Configuración general del sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="language">Idioma</Label>
-              <Input id="language" defaultValue="Español" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Zona Horaria</Label>
-              <Input id="timezone" defaultValue="Europe/Madrid" />
-            </div>
-            <Button className="w-full">Guardar Preferencias</Button>
           </CardContent>
         </Card>
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Smartphone, Activity, Clock, MapPin, Wifi, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 interface Reading {
@@ -127,12 +128,36 @@ export default function MyDevices() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">Mis Dispositivos</h2>
-          <p className="text-gray-500">Dispositivos que has reclamado</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Mis Dispositivos</h2>
+            <p className="text-gray-500">Dispositivos que has reclamado</p>
+          </div>
+          <Skeleton className="h-9 w-24" />
         </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-48" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <div className="space-y-2 pt-2 border-t">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     )

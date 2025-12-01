@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Activity, Gauge, AlertTriangle, CheckCircle } from 'lucide-react'
 
 export default function DashboardHome() {
@@ -60,10 +61,19 @@ export default function DashboardHome() {
             <Gauge className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loading ? '...' : stats.totalLecturas}</div>
-            <p className="text-xs text-muted-foreground">
-              Últimas 10 lecturas
-            </p>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.totalLecturas}</div>
+                <p className="text-xs text-muted-foreground">
+                  Últimas 10 lecturas
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -73,12 +83,21 @@ export default function DashboardHome() {
             <Activity className={`h-4 w-4 ${stats.ultimaLectura?.estado === 'normal' ? 'text-green-500' : 'text-yellow-500'}`} />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.ultimaLectura?.estado === 'normal' ? 'text-green-600' : 'text-yellow-600'}`}>
-              {loading ? '...' : (stats.ultimaLectura?.valor_ppm || 'N/A')}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {stats.ultimaLectura?.estado?.toUpperCase() || 'Sin datos'} PPM
-            </p>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-20 mb-2" />
+                <Skeleton className="h-3 w-24" />
+              </>
+            ) : (
+              <>
+                <div className={`text-2xl font-bold ${stats.ultimaLectura?.estado === 'normal' ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {stats.ultimaLectura?.valor_ppm || 'N/A'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.ultimaLectura?.estado?.toUpperCase() || 'Sin datos'} PPM
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -88,12 +107,21 @@ export default function DashboardHome() {
             <AlertTriangle className={`h-4 w-4 ${stats.alertasActivas > 0 ? 'text-yellow-500' : 'text-green-500'}`} />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.alertasActivas > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
-              {loading ? '...' : stats.alertasActivas}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {stats.alertasActivas === 0 ? 'Todo normal' : 'Requieren atención'}
-            </p>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-12 mb-2" />
+                <Skeleton className="h-3 w-28" />
+              </>
+            ) : (
+              <>
+                <div className={`text-2xl font-bold ${stats.alertasActivas > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                  {stats.alertasActivas}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.alertasActivas === 0 ? 'Todo normal' : 'Requieren atención'}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -103,16 +131,50 @@ export default function DashboardHome() {
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">Operativo</div>
-            <p className="text-xs text-muted-foreground">
-              Sensor funcionando correctamente
-            </p>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-24 mb-2" />
+                <Skeleton className="h-3 w-40" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-green-600">Operativo</div>
+                <p className="text-xs text-muted-foreground">
+                  Sensor funcionando correctamente
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
 
       {/* Última lectura detallada */}
-      {stats.ultimaLectura && (
+      {loading ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="text-center space-y-2">
+                <Skeleton className="h-4 w-20 mx-auto" />
+                <Skeleton className="h-8 w-16 mx-auto" />
+              </div>
+              <div className="text-center space-y-2">
+                <Skeleton className="h-4 w-16 mx-auto" />
+                <Skeleton className="h-6 w-24 mx-auto" />
+              </div>
+              <div className="text-center space-y-2">
+                <Skeleton className="h-4 w-16 mx-auto" />
+                <Skeleton className="h-6 w-28 mx-auto" />
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t">
+              <Skeleton className="h-3 w-64" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : stats.ultimaLectura && (
         <Card>
           <CardHeader>
             <CardTitle>Última Lectura del Sensor</CardTitle>

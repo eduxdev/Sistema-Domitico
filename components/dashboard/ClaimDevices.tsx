@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Smartphone, 
   Plus, 
@@ -139,12 +140,39 @@ export default function ClaimDevices() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">Reclamar Dispositivo</h2>
-          <p className="text-gray-500">Dispositivos disponibles para reclamar</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Reclamar Dispositivo</h2>
+            <p className="text-gray-500">Dispositivos disponibles para reclamar</p>
+          </div>
+          <Skeleton className="h-9 w-24" />
         </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2].map((i) => (
+            <Card key={i}>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+                <Skeleton className="h-4 w-48" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <div className="space-y-3 pt-4 border-t">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     )
