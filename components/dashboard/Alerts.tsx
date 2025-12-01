@@ -5,31 +5,33 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Bell, AlertTriangle, CheckCircle, Info } from 'lucide-react'
 
-interface Notificacion {
-  id: string
-  tipo: string
-  destinatario: string
-  asunto: string | null
-  mensaje: string
+interface Lectura {
+  id: number
+  valor_ppm: number
   estado: string
-  lectura_id: number | null
-  valor_ppm: number | null
-  nivel_alerta: string | null
-  respuesta_api: string | null
-  error_mensaje: string | null
+  sensor_nombre: string | null
+  device_id: string | null
   created_at: string
+  device_name?: string
+}
+
+interface Device {
+  id: string
+  device_id: string
+  nombre: string
+  nickname?: string
 }
 
 export default function Alerts() {
-  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([])
-  const [lecturas, setLecturas] = useState<any[]>([])
+  const [lecturas, setLecturas] = useState<Lectura[]>([])
+  const [devices, setDevices] = useState<Device[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchData()
-    // Actualizar cada 30 segundos
-    const interval = setInterval(fetchData, 30000)
+    // Actualizar cada 15 segundos para alertas en tiempo real
+    const interval = setInterval(fetchData, 15000)
     return () => clearInterval(interval)
   }, [])
 
@@ -37,17 +39,53 @@ export default function Alerts() {
     try {
       setLoading(true)
       
-      // Obtener lecturas recientes
-      const notifResponse = await fetch('/api/sensor/data?limit=20')
+      // Primero obtener los dispositivos del usuario
+      const devicesResponse = await fetch('/api/devices/my-devices')
+      const devicesData = await devicesResponse.json()
       
-      if (notifResponse.ok) {
-        const data = await notifResponse.json()
-        
-        // Filtrar solo lecturas con alertas (no normales)
-        const alertas = data.data?.filter((lectura: { estado: string }) => lectura.estado !== 'normal') || []
-        setLecturas(alertas)
+      if (!devicesData.success) {
+        setError('Error al cargar dispositivos del usuario')
+        return
       }
-
+      
+      const userDevices = devicesData.devices || []
+      setDevices(userDevices)
+      
+      if (userDevices.length === 0) {
+        setLecturas([])
+        setError(null)
+        return
+      }
+      
+      // Obtener alertas de todos los dispositivos del usuario
+      const allAlerts: Lectura[] = []
+      
+      for (const device of userDevices) {
+        try {
+          const alertsResponse = await fetch(`/api/sensor/data?limit=10&device_id=${device.device_id}`)
+          const alertsData = await alertsResponse.json()
+          
+          if (alertsData.success && alertsData.data) {
+            // Filtrar solo lecturas con alertas (no normales) y agregar info del dispositivo
+            const deviceAlerts = alertsData.data
+              .filter((lectura: Lectura) => lectura.estado !== 'normal')
+              .map((lectura: Lectura) => ({
+                ...lectura,
+                device_name: device.nickname || device.nombre,
+                device_id: device.device_id
+              }))
+            
+            allAlerts.push(...deviceAlerts)
+          }
+        } catch (err) {
+          console.error(`Error fetching alerts for device ${device.device_id}:`, err)
+        }
+      }
+      
+      // Ordenar por fecha más reciente
+      allAlerts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      
+      setLecturas(allAlerts)
       setError(null)
     } catch (err) {
       console.error('Error fetching data:', err)
@@ -74,13 +112,13 @@ export default function Alerts() {
     const severity = getSeverityFromEstado(estado)
     switch (severity) {
       case 'high':
-        return <Badge className="bg-red-100 text-red-800">PELIGRO</Badge>
+        return <Badge className="bg-red-100 text-red-800 text-xs px-2 py-0">PELIGRO</Badge>
       case 'medium':
-        return <Badge className="bg-yellow-100 text-yellow-800">PRECAUCIÓN</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0">PRECAUCIÓN</Badge>
       case 'low':
-        return <Badge className="bg-green-100 text-green-800">NORMAL</Badge>
+        return <Badge className="bg-green-100 text-green-800 text-xs px-2 py-0">NORMAL</Badge>
       default:
-        return <Badge>Sin definir</Badge>
+        return <Badge className="text-xs px-2 py-0">Sin definir</Badge>
     }
   }
 
@@ -88,13 +126,13 @@ export default function Alerts() {
     const severity = getSeverityFromEstado(estado)
     switch (severity) {
       case 'high':
-        return <AlertTriangle className="h-5 w-5 text-red-600" />
+        return <AlertTriangle className="h-4 w-4 text-red-600" />
       case 'medium':
-        return <Info className="h-5 w-5 text-yellow-600" />
+        return <Info className="h-4 w-4 text-yellow-600" />
       case 'low':
-        return <CheckCircle className="h-5 w-5 text-green-600" />
+        return <CheckCircle className="h-4 w-4 text-green-600" />
       default:
-        return <Bell className="h-5 w-5" />
+        return <Bell className="h-4 w-4" />
     }
   }
 
@@ -133,30 +171,48 @@ export default function Alerts() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Alertas del Sensor</h2>
-        <Badge variant="secondary">
-          {lecturas.length} lecturas con alertas
-        </Badge>
+        <div>
+          <h2 className="text-2xl font-bold">Alertas de Mis Dispositivos</h2>
+          <p className="text-gray-500">Alertas de los dispositivos que has reclamado</p>
+        </div>
+        <div className="flex gap-2">
+          <Badge variant="secondary">
+            {devices.length} dispositivos
+          </Badge>
+          <Badge variant={lecturas.length > 0 ? "destructive" : "secondary"}>
+            {lecturas.length} alertas activas
+          </Badge>
+        </div>
       </div>
 
-      {lecturas.length === 0 ? (
+      {devices.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Info className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+            <p className="text-gray-500 mb-2">No tienes dispositivos reclamados</p>
+            <p className="text-sm text-gray-400">
+              Ve a &quot;Reclamar Dispositivo&quot; para agregar dispositivos y ver sus alertas aquí.
+            </p>
+          </CardContent>
+        </Card>
+      ) : lecturas.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <p className="text-gray-500 mb-2">No hay alertas activas</p>
             <p className="text-sm text-gray-400">
-              Las alertas se mostrarán aquí cuando el sensor detecte niveles elevados de gas.
+              Todos tus dispositivos están funcionando normalmente. Las alertas aparecerán aquí cuando se detecten niveles elevados de gas.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {lecturas.map((lectura) => {
             const severity = getSeverityFromEstado(lectura.estado)
             return (
               <Card
                 key={lectura.id}
-                className={`border-l-4 ${
+                className={`border-l-4 hover:shadow-md transition-shadow ${
                   severity === 'high'
                     ? 'border-red-500'
                     : severity === 'medium'
@@ -164,47 +220,42 @@ export default function Alerts() {
                     : 'border-green-500'
                 }`}
               >
-                <CardHeader>
-                  <div className="flex justify-between items-start">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {getSeverityIcon(lectura.estado)}
-                      <CardTitle className="text-lg">
-                        {lectura.sensor_nombre || 'Sensor Principal'}
-                      </CardTitle>
+                      <div>
+                        <h3 className="font-semibold text-sm">
+                          {lectura.device_name || lectura.sensor_nombre || 'Sensor Principal'}
+                        </h3>
+                        <p className="text-xs text-gray-500 font-mono">
+                          {lectura.device_id}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      {getSeverityBadge(lectura.estado)}
-                    </div>
+                    {getSeverityBadge(lectura.estado)}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 mb-2">
-                    Nivel de gas detectado: <strong>{lectura.valor_ppm} PPM</strong>
-                  </p>
                   
-                  <p className="text-sm text-gray-600 mb-2">
-                    Estado: <span className={`font-medium ${
-                      lectura.estado === 'peligro' ? 'text-red-600' :
-                      lectura.estado === 'precaucion' ? 'text-yellow-600' : 'text-green-600'
-                    }`}>
-                      {lectura.estado.toUpperCase()}
-                    </span>
-                  </p>
-                  
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>
-                      📅 {new Date(lectura.created_at).toLocaleString('es-ES')}
-                    </span>
-                    {lectura.estado === 'peligro' && (
-                      <Badge variant="outline" className="bg-red-50 text-red-700">
-                        🚨 Requiere atención inmediata
-                      </Badge>
-                    )}
-                    {lectura.estado === 'precaucion' && (
-                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-                        ⚠️ Monitorear de cerca
-                      </Badge>
-                    )}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-600">Nivel:</span>
+                      <span className="font-bold text-lg">{lectura.valor_ppm} PPM</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{new Date(lectura.created_at).toLocaleString('es-ES', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</span>
+                      {lectura.estado === 'peligro' && (
+                        <span className="text-red-600 font-medium">🚨 Urgente</span>
+                      )}
+                      {lectura.estado === 'precaucion' && (
+                        <span className="text-yellow-600 font-medium">⚠️ Atención</span>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

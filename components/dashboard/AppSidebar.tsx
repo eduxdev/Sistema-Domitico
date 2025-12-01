@@ -18,7 +18,9 @@ import {
   PlusCircle, 
   Bell, 
   Settings,
-  LogOut 
+  LogOut,
+  Smartphone,
+  Plus
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -44,6 +46,21 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           title: 'Dashboard',
           icon: Home,
           section: 'dashboard',
+        },
+      ],
+    },
+    {
+      title: 'Dispositivos',
+      items: [
+        {
+          title: 'Mis Dispositivos',
+          icon: Smartphone,
+          section: 'my-devices',
+        },
+        {
+          title: 'Reclamar Dispositivo',
+          icon: Plus,
+          section: 'claim-devices',
         },
       ],
     },

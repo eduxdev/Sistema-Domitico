@@ -81,7 +81,6 @@ export async function enviarEmailPrueba(destinatario: string) {
       return { success: false, error };
     }
 
-    console.log('Email de prueba enviado exitosamente:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Error en enviarEmailPrueba:', error);
@@ -144,7 +143,6 @@ export async function enviarAlertaGas(alertaData: AlertaGasData) {
       return { success: false, error };
     }
 
-    console.log('Email enviado exitosamente:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Error en enviarAlertaGas:', error);
@@ -209,7 +207,6 @@ export async function sendDangerAlert(emailData: EmailData) {
       return { success: false, error };
     }
 
-    console.log('Email enviado exitosamente:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Error en sendDangerAlert:', error);
