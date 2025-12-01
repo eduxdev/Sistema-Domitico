@@ -6,6 +6,8 @@ import { AppSidebar } from '@/components/dashboard/AppSidebar'
 import Alerts from '../dashboard/Alerts'
 import Settings from '../dashboard/Settings'
 import DashboardHome from '../dashboard/DashboardHome'
+import MyDevices from '../dashboard/MyDevices'
+import ClaimDevices from '../dashboard/ClaimDevices'
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<string>('dashboard')
@@ -14,6 +16,10 @@ export default function Dashboard() {
     switch (activeSection) {
       case 'dashboard':
         return <DashboardHome />
+      case 'my-devices':
+        return <MyDevices />
+      case 'claim-devices':
+        return <ClaimDevices />
       case 'alerts':
         return <Alerts />
       case 'settings':

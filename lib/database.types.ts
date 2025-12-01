@@ -14,9 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      dispositivos: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string | null
+          device_id: string
+          estado: string | null
+          id: string
+          ip_address: unknown
+          is_claimed: boolean | null
+          mac_address: string | null
+          nombre: string
+          tipo: string | null
+          ubicacion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string | null
+          device_id: string
+          estado?: string | null
+          id?: string
+          ip_address?: unknown
+          is_claimed?: boolean | null
+          mac_address?: string | null
+          nombre: string
+          tipo?: string | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string | null
+          device_id?: string
+          estado?: string | null
+          id?: string
+          ip_address?: unknown
+          is_claimed?: boolean | null
+          mac_address?: string | null
+          nombre?: string
+          tipo?: string | null
+          ubicacion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispositivos_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lecturas_gas: {
         Row: {
           created_at: string | null
+          device_id: string | null
           estado: string
           id: number
           sensor_nombre: string | null
@@ -24,6 +81,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          device_id?: string | null
           estado: string
           id?: number
           sensor_nombre?: string | null
@@ -31,12 +89,21 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          device_id?: string | null
           estado?: string
           id?: number
           sensor_nombre?: string | null
           valor_ppm?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lecturas_gas_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["device_id"]
+          },
+        ]
       }
       lecturas_peligro: {
         Row: {
@@ -201,7 +268,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_old_alerts: { Args: never; Returns: number }
+      get_available_devices_for_user: {
+        Args: { user_uuid: string }
+        Returns: {
+          device_id: string
+          device_name: string
+          device_type: string
+          ip_address: string
+          is_claimed: boolean
+          last_seen: string
+          mac_address: string
+        }[]
+      }
+      get_latest_sensor_reading: {
+        Args: { device_uuid: string }
+        Returns: {
+          buzzer_activated: boolean
+          device_name: string
+          gas_level: string
+          reading_timestamp: string
+          sensor_value: number
+        }[]
+      }
+      resolve_alerts_for_device: {
+        Args: { device_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
