@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     // Verificar si el usuario ya existe
     const { data: existingUser } = await supabase
-      .from('users')
+      .from('usuarios')
       .select('id')
       .eq('email', email)
       .single()
@@ -39,16 +39,22 @@ export async function POST(request: Request) {
     // Hashear contraseña
     const passwordHash = await bcrypt.hash(password, 12)
 
+    // Separar nombre y apellidos
+    const nameParts = fullName.trim().split(' ')
+    const nombre = nameParts[0] || ''
+    const apellidos = nameParts.slice(1).join(' ') || ''
+
     // Crear usuario
     const { data: user, error } = await supabase
-      .from('users')
+      .from('usuarios')
       .insert({
         email,
         password_hash: passwordHash,
-        full_name: fullName,
-        phone_number: phoneNumber || null
+        nombre,
+        apellidos,
+        telefono: phoneNumber || null
       })
-      .select('id, email, full_name, phone_number')
+      .select('id, email, nombre, apellidos, telefono')
       .single()
 
     if (error) {
@@ -60,8 +66,8 @@ export async function POST(request: Request) {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.full_name,
-        phoneNumber: user.phone_number
+        fullName: `${user.nombre} ${user.apellidos}`.trim(),
+        phoneNumber: user.telefono
       }
     })
 

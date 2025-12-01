@@ -1,12 +1,56 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Settings as SettingsIcon } from 'lucide-react'
+import { Settings as SettingsIcon, Mail, TestTube } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
+  const [user, setUser] = useState<{
+    id: string;
+    email: string;
+    fullName: string;
+    phoneNumber?: string;
+  } | null>(null)
+  const [testingEmail, setTestingEmail] = useState(false)
+
+  useEffect(() => {
+    // Obtener datos del usuario desde localStorage
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
+
+  const testEmail = async (tipo: 'prueba' | 'alerta') => {
+    setTestingEmail(true)
+    try {
+      const response = await fetch(`/api/alerts/email?tipo=${tipo}`, {
+        credentials: 'include'
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast.success(`Email de ${tipo} enviado exitosamente`, {
+          description: `Se envió a ${user?.email || 'tu email'}`
+        })
+      } else {
+        toast.error(`Error enviando email de ${tipo}`, {
+          description: data.error
+        })
+      }
+    } catch {
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor'
+      })
+    } finally {
+      setTestingEmail(false)
+    }
+  }
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -17,21 +61,50 @@ export default function SettingsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Notificaciones</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Notificaciones por Email
+            </CardTitle>
             <CardDescription>
-              Configura cómo recibes las alertas y notificaciones
+              Configura y prueba las alertas por correo electrónico
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="email-notifications">Notificaciones por Email</Label>
-              <input type="checkbox" id="email-notifications" className="w-4 h-4 rounded" />
+            <div className="space-y-2">
+              <Label>Email de destino</Label>
+              <Input 
+                value={user?.email || ''} 
+                disabled 
+                className="bg-gray-50"
+              />
+              <p className="text-xs text-gray-500">
+                Las alertas se envían automáticamente a tu email registrado
+              </p>
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="whatsapp-notifications">Notificaciones por WhatsApp</Label>
-              <input type="checkbox" id="whatsapp-notifications" className="w-4 h-4 rounded" />
+            
+            <div className="space-y-2">
+              <Label>Probar notificaciones</Label>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => testEmail('prueba')}
+                  disabled={testingEmail}
+                  className="flex-1"
+                >
+                  <TestTube className="mr-2 h-4 w-4" />
+                  Email de Prueba
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => testEmail('alerta')}
+                  disabled={testingEmail}
+                  className="flex-1"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Simular Alerta
+                </Button>
+              </div>
             </div>
-            <Button className="w-full">Guardar Cambios</Button>
           </CardContent>
         </Card>
 
@@ -45,13 +118,35 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre Completo</Label>
-              <Input id="name" placeholder="Tu nombre" />
+              <Input 
+                id="name" 
+                value={user?.fullName || ''} 
+                disabled 
+                className="bg-gray-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                value={user?.email || ''} 
+                disabled 
+                className="bg-gray-50"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Teléfono</Label>
-              <Input id="phone" placeholder="+34 123 456 789" />
+              <Input 
+                id="phone" 
+                value={user?.phoneNumber || ''} 
+                disabled 
+                className="bg-gray-50"
+                placeholder="No configurado"
+              />
             </div>
-            <Button className="w-full">Actualizar Perfil</Button>
+            <p className="text-xs text-gray-500">
+              Para modificar tu perfil, contacta al administrador del sistema
+            </p>
           </CardContent>
         </Card>
 

@@ -45,21 +45,6 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           icon: Home,
           section: 'dashboard',
         },
-        {
-          title: 'Mis Dispositivos',
-          icon: Package,
-          section: 'my-devices',
-        },
-      ],
-    },
-    {
-      title: 'Dispositivos',
-      items: [
-        {
-          title: 'Agregar Dispositivos',
-          icon: PlusCircle,
-          section: 'add-devices',
-        },
       ],
     },
     {

@@ -1,15 +1,48 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Activity, Package, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Activity, Gauge, AlertTriangle, CheckCircle } from 'lucide-react'
 
 export default function DashboardHome() {
-  // Datos de ejemplo - más adelante se pueden obtener del API
-  const stats = {
-    totalDevices: 3,
-    activeDevices: 2,
-    totalAlerts: 1,
-    resolvedAlerts: 0,
+  const [stats, setStats] = useState({
+    totalLecturas: 0,
+    ultimaLectura: null as {
+      id: number;
+      valor_ppm: number;
+      estado: string;
+      sensor_nombre: string;
+      created_at: string;
+    } | null,
+    alertasActivas: 0,
+    sistemaOperativo: true,
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchStats()
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchStats, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const fetchStats = async () => {
+    try {
+      // Obtener últimas lecturas
+      const lecturas = await fetch('/api/sensor/data?limit=10')
+      const lecturasData = await lecturas.json()
+      
+      setStats({
+        totalLecturas: lecturasData.data?.length || 0,
+        ultimaLectura: lecturasData.data?.[0] || null,
+        alertasActivas: lecturasData.data?.filter((l: { estado: string }) => l.estado !== 'normal').length || 0,
+        sistemaOperativo: true,
+      })
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -23,26 +56,28 @@ export default function DashboardHome() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Dispositivos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Lecturas Recientes</CardTitle>
+            <Gauge className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDevices}</div>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalLecturas}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.activeDevices} activos
+              Últimas 10 lecturas
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Dispositivos Activos</CardTitle>
-            <Activity className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium">Última Lectura</CardTitle>
+            <Activity className={`h-4 w-4 ${stats.ultimaLectura?.estado === 'normal' ? 'text-green-500' : 'text-yellow-500'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.activeDevices}</div>
+            <div className={`text-2xl font-bold ${stats.ultimaLectura?.estado === 'normal' ? 'text-green-600' : 'text-yellow-600'}`}>
+              {loading ? '...' : (stats.ultimaLectura?.valor_ppm || 'N/A')}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {stats.totalDevices - stats.activeDevices} inactivos
+              {stats.ultimaLectura?.estado?.toUpperCase() || 'Sin datos'} PPM
             </p>
           </CardContent>
         </Card>
@@ -50,12 +85,14 @@ export default function DashboardHome() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Alertas Activas</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+            <AlertTriangle className={`h-4 w-4 ${stats.alertasActivas > 0 ? 'text-yellow-500' : 'text-green-500'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.totalAlerts}</div>
+            <div className={`text-2xl font-bold ${stats.alertasActivas > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+              {loading ? '...' : stats.alertasActivas}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {stats.resolvedAlerts} resueltas
+              {stats.alertasActivas === 0 ? 'Todo normal' : 'Requieren atención'}
             </p>
           </CardContent>
         </Card>
@@ -68,36 +105,46 @@ export default function DashboardHome() {
           <CardContent>
             <div className="text-2xl font-bold text-green-600">Operativo</div>
             <p className="text-xs text-muted-foreground">
-              Todo funcionando correctamente
+              Sensor funcionando correctamente
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Actividad reciente */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Actividad Reciente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Dispositivo agregado</p>
-                <p className="text-sm text-gray-500">Sensor Cocina fue agregado</p>
+      {/* Última lectura detallada */}
+      {stats.ultimaLectura && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Última Lectura del Sensor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Valor PPM</p>
+                <p className="text-2xl font-bold">{stats.ultimaLectura.valor_ppm}</p>
               </div>
-              <span className="text-xs text-gray-400">Hace 2 horas</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Lectura del sensor</p>
-                <p className="text-sm text-gray-500">Nivel de gas: NORMAL</p>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Estado</p>
+                <p className={`text-lg font-semibold ${
+                  stats.ultimaLectura.estado === 'normal' ? 'text-green-600' :
+                  stats.ultimaLectura.estado === 'precaucion' ? 'text-yellow-600' : 'text-red-600'
+                }`}>
+                  {stats.ultimaLectura.estado?.toUpperCase()}
+                </p>
               </div>
-              <span className="text-xs text-gray-400">Hace 5 minutos</span>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Sensor</p>
+                <p className="text-lg font-medium">{stats.ultimaLectura.sensor_nombre || 'Principal'}</p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-xs text-gray-500">
+                Última actualización: {new Date(stats.ultimaLectura.created_at).toLocaleString('es-ES')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

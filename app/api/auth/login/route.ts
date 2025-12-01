@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
     // Buscar usuario
     const { data: user, error } = await supabase
-      .from('users')
+      .from('usuarios')
       .select('*')
       .eq('email', email)
       .single()
@@ -75,8 +75,8 @@ export async function POST(request: Request) {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.full_name,
-        phoneNumber: user.phone_number
+        fullName: `${user.nombre} ${user.apellidos}`.trim(),
+        phoneNumber: user.telefono
       }
     })
 

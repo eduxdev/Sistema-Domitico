@@ -14,236 +14,184 @@ export type Database = {
   }
   public: {
     Tables: {
-      alerts: {
-        Row: {
-          alert_type: string
-          created_at: string | null
-          device_id: string | null
-          gas_level: string | null
-          id: string
-          is_resolved: boolean | null
-          is_sent: boolean | null
-          message: string | null
-          notification_sent_at: string | null
-          notification_type: string | null
-          resolved_at: string | null
-          sensor_value: number | null
-          updated_at: string | null
-          user_id: string | null
-          warning_start_time: string | null
-        }
-        Insert: {
-          alert_type: string
-          created_at?: string | null
-          device_id?: string | null
-          gas_level?: string | null
-          id?: string
-          is_resolved?: boolean | null
-          is_sent?: boolean | null
-          message?: string | null
-          notification_sent_at?: string | null
-          notification_type?: string | null
-          resolved_at?: string | null
-          sensor_value?: number | null
-          updated_at?: string | null
-          user_id?: string | null
-          warning_start_time?: string | null
-        }
-        Update: {
-          alert_type?: string
-          created_at?: string | null
-          device_id?: string | null
-          gas_level?: string | null
-          id?: string
-          is_resolved?: boolean | null
-          is_sent?: boolean | null
-          message?: string | null
-          notification_sent_at?: string | null
-          notification_type?: string | null
-          resolved_at?: string | null
-          sensor_value?: number | null
-          updated_at?: string | null
-          user_id?: string | null
-          warning_start_time?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "alerts_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "devices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "alerts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      devices: {
+      lecturas_gas: {
         Row: {
           created_at: string | null
-          device_id: string
-          device_name: string
-          device_type: string | null
-          id: string
-          ip_address: string | null
-          is_active: boolean | null
-          last_seen: string | null
-          mac_address: string | null
-          updated_at: string | null
+          estado: string
+          id: number
+          sensor_nombre: string | null
+          valor_ppm: number
         }
         Insert: {
           created_at?: string | null
-          device_id: string
-          device_name: string
-          device_type?: string | null
-          id?: string
-          ip_address?: string | null
-          is_active?: boolean | null
-          last_seen?: string | null
-          mac_address?: string | null
-          updated_at?: string | null
+          estado: string
+          id?: number
+          sensor_nombre?: string | null
+          valor_ppm: number
         }
         Update: {
           created_at?: string | null
-          device_id?: string
-          device_name?: string
-          device_type?: string | null
-          id?: string
-          ip_address?: string | null
-          is_active?: boolean | null
-          last_seen?: string | null
-          mac_address?: string | null
-          updated_at?: string | null
+          estado?: string
+          id?: number
+          sensor_nombre?: string | null
+          valor_ppm?: number
         }
         Relationships: []
       }
-      sensor_readings: {
-        Row: {
-          buzzer_activated: boolean
-          created_at: string
-          device_id: string | null
-          gas_level: string
-          id: number
-          sensor_value: number
-          timestamp: string
-          user_id: string | null
-        }
-        Insert: {
-          buzzer_activated?: boolean
-          created_at?: string
-          device_id?: string | null
-          gas_level: string
-          id?: number
-          sensor_value: number
-          timestamp?: string
-          user_id?: string | null
-        }
-        Update: {
-          buzzer_activated?: boolean
-          created_at?: string
-          device_id?: string | null
-          gas_level?: string
-          id?: number
-          sensor_value?: number
-          timestamp?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sensor_readings_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "devices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sensor_readings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_devices: {
-        Row: {
-          added_at: string | null
-          device_id: string | null
-          id: string
-          is_primary_owner: boolean | null
-          location: string | null
-          nickname: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          added_at?: string | null
-          device_id?: string | null
-          id?: string
-          is_primary_owner?: boolean | null
-          location?: string | null
-          nickname?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          added_at?: string | null
-          device_id?: string | null
-          id?: string
-          is_primary_owner?: boolean | null
-          location?: string | null
-          nickname?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_devices_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "devices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_devices_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users: {
+      lecturas_peligro: {
         Row: {
           created_at: string | null
-          email: string
-          full_name: string
+          estado: string
+          fecha_hora: string | null
           id: string
-          password_hash: string
-          phone_number: string | null
-          updated_at: string | null
+          notas: string | null
+          sensor_nombre: string
+          ubicacion: string | null
+          valor_ppm: number
         }
         Insert: {
           created_at?: string | null
-          email: string
-          full_name: string
+          estado: string
+          fecha_hora?: string | null
           id?: string
-          password_hash: string
-          phone_number?: string | null
-          updated_at?: string | null
+          notas?: string | null
+          sensor_nombre: string
+          ubicacion?: string | null
+          valor_ppm: number
         }
         Update: {
           created_at?: string | null
-          email?: string
-          full_name?: string
+          estado?: string
+          fecha_hora?: string | null
           id?: string
+          notas?: string | null
+          sensor_nombre?: string
+          ubicacion?: string | null
+          valor_ppm?: number
+        }
+        Relationships: []
+      }
+      notificaciones_enviadas: {
+        Row: {
+          asunto: string | null
+          created_at: string | null
+          destinatario: string
+          error_mensaje: string | null
+          estado: string
+          id: string
+          lectura_id: number | null
+          mensaje: string
+          nivel_alerta: string | null
+          respuesta_api: string | null
+          tipo: string
+          valor_ppm: number | null
+        }
+        Insert: {
+          asunto?: string | null
+          created_at?: string | null
+          destinatario: string
+          error_mensaje?: string | null
+          estado: string
+          id?: string
+          lectura_id?: number | null
+          mensaje: string
+          nivel_alerta?: string | null
+          respuesta_api?: string | null
+          tipo: string
+          valor_ppm?: number | null
+        }
+        Update: {
+          asunto?: string | null
+          created_at?: string | null
+          destinatario?: string
+          error_mensaje?: string | null
+          estado?: string
+          id?: string
+          lectura_id?: number | null
+          mensaje?: string
+          nivel_alerta?: string | null
+          respuesta_api?: string | null
+          tipo?: string
+          valor_ppm?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificaciones_enviadas_lectura_id_fkey"
+            columns: ["lectura_id"]
+            isOneToOne: false
+            referencedRelation: "lecturas_gas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reportes_generados: {
+        Row: {
+          created_at: string | null
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          formato: string | null
+          generado_por: string | null
+          id: string
+          nombre_archivo: string
+          tipo_reporte: string
+          total_alertas: number | null
+          total_lecturas: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          formato?: string | null
+          generado_por?: string | null
+          id?: string
+          nombre_archivo: string
+          tipo_reporte: string
+          total_alertas?: number | null
+          total_lecturas?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          formato?: string | null
+          generado_por?: string | null
+          id?: string
+          nombre_archivo?: string
+          tipo_reporte?: string
+          total_alertas?: number | null
+          total_lecturas?: number | null
+        }
+        Relationships: []
+      }
+      usuarios: {
+        Row: {
+          apellidos: string
+          created_at: string | null
+          email: string
+          id: string
+          nombre: string
+          password_hash: string
+          telefono: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          apellidos: string
+          created_at?: string | null
+          email: string
+          id?: string
+          nombre: string
+          password_hash: string
+          telefono?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          apellidos?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          nombre?: string
           password_hash?: string
-          phone_number?: string | null
+          telefono?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -253,33 +201,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_old_alerts: { Args: never; Returns: number }
-      get_available_devices_for_user: {
-        Args: { user_uuid: string }
-        Returns: {
-          device_id: string
-          device_name: string
-          device_type: string
-          ip_address: string
-          is_claimed: boolean
-          last_seen: string
-          mac_address: string
-        }[]
-      }
-      get_latest_sensor_reading: {
-        Args: { device_uuid: string }
-        Returns: {
-          buzzer_activated: boolean
-          device_name: string
-          gas_level: string
-          reading_timestamp: string
-          sensor_value: number
-        }[]
-      }
-      resolve_alerts_for_device: {
-        Args: { device_uuid: string }
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
@@ -290,16 +212,125 @@ export type Database = {
   }
 }
 
-// Tipos de conveniencia para usar en la aplicación
-export type SensorReading = Database['public']['Tables']['sensor_readings']['Row']
-export type User = Database['public']['Tables']['users']['Row']
-export type Device = Database['public']['Tables']['devices']['Row']
-export type UserDevice = Database['public']['Tables']['user_devices']['Row']
-export type Alert = Database['public']['Tables']['alerts']['Row']
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-// Tipos para inserciones
-export type SensorReadingInsert = Database['public']['Tables']['sensor_readings']['Insert']
-export type UserInsert = Database['public']['Tables']['users']['Insert']
-export type DeviceInsert = Database['public']['Tables']['devices']['Insert']
-export type UserDeviceInsert = Database['public']['Tables']['user_devices']['Insert']
-export type AlertInsert = Database['public']['Tables']['alerts']['Insert']
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
