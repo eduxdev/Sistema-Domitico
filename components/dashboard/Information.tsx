@@ -3,11 +3,11 @@
 import React, { useState } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/dashboard/AppSidebar'
-import LocalDevices from '../devices/LocalDevices'
-import MyDevices from '../devices/MyDevices'
 import Alerts from '../dashboard/Alerts'
 import Settings from '../dashboard/Settings'
 import DashboardHome from '../dashboard/DashboardHome'
+import MyDevices from '../dashboard/MyDevices'
+import ClaimDevices from '../dashboard/ClaimDevices'
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<string>('dashboard')
@@ -18,8 +18,8 @@ export default function Dashboard() {
         return <DashboardHome />
       case 'my-devices':
         return <MyDevices />
-      case 'add-devices':
-        return <LocalDevices />
+      case 'claim-devices':
+        return <ClaimDevices />
       case 'alerts':
         return <Alerts />
       case 'settings':

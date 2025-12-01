@@ -18,22 +18,12 @@ export default function Hero() {
           </p>
           
           <div className="mt-6 sm:mt-10">
-            <Link href="/dashboard">
-              <RainbowButton 
-                variant="outline" 
-                className="font-mono text-base sm:text-lg px-6 sm:px-8 py-2 sm:py-3 transition-all duration-300 hover:scale-105"
-              >
-                Iniciar
-              </RainbowButton>
-            </Link>
-          </div>
-          <div className="mt-6 sm:mt-10">
             <Link href="/auth">
               <RainbowButton 
                 variant="outline" 
                 className="font-mono text-base sm:text-lg px-6 sm:px-8 py-2 sm:py-3 transition-all duration-300 hover:scale-105"
               >
-                Iniciar
+                Iniciar Sesión
               </RainbowButton>
             </Link>
           </div>

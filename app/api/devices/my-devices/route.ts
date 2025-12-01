@@ -1,79 +1,67 @@
-import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { verifyAuth } from '@/lib/auth'
+import { NextResponse } from "next/server"
+import { supabase } from "@/lib/supabase"
+import { verifyAuth } from "@/lib/auth"
 
+/**
+ * API Endpoint: Obtener dispositivos del usuario autenticado
+ * GET /api/devices/my-devices
+ */
 export async function GET(request: Request) {
   try {
+    // Verificar autenticación
     const user = await verifyAuth(request)
     if (!user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      )
     }
 
-    // Obtener dispositivos reclamados por el usuario con información detallada
-    const { data: userDevices, error } = await supabase
-      .from('user_devices')
+    // Obtener dispositivos del usuario con última lectura
+    const { data: dispositivos, error } = await supabase
+      .from('dispositivos')
       .select(`
-        id,
-        nickname,
-        location,
-        added_at,
-        device:devices (
+        *,
+        lecturas_gas!lecturas_gas_device_id_fkey (
           id,
-          device_id,
-          device_name,
-          device_type,
-          mac_address,
-          ip_address,
-          is_active,
-          last_seen,
+          valor_ppm,
+          estado,
           created_at
         )
       `)
-      .eq('user_id', user.userId)
-      .order('added_at', { ascending: false })
+      .eq('claimed_by', user.userId)
+      .eq('is_claimed', true)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error obteniendo dispositivos del usuario:', error)
-      throw error
+      return NextResponse.json(
+        { error: "Error al obtener tus dispositivos" },
+        { status: 500 }
+      )
     }
 
-    // Para cada dispositivo, obtener la última lectura del sensor
-    const devicesWithSensorData = await Promise.all(
-      (userDevices || []).map(async (item) => {
-        const deviceId = item.device?.id
-        
-        if (!deviceId) {
-          return {
-            ...item,
-            latestReading: null
-          }
-        }
-
-        // Obtener la última lectura del sensor para este dispositivo
-        const { data: latestReadingData } = await supabase
-          .from('sensor_readings')
-          .select('*')
-          .eq('device_id', deviceId)
-          .order('timestamp', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-
-        return {
-          ...item,
-          latestReading: latestReadingData || null
-        }
-      })
-    )
+    // Procesar datos para incluir última lectura
+    const dispositivosConLectura = dispositivos?.map(dispositivo => {
+      const lecturas = dispositivo.lecturas_gas || []
+      const ultimaLectura = lecturas.length > 0 ? lecturas[0] : null
+      
+      return {
+        ...dispositivo,
+        ultima_lectura: ultimaLectura,
+        total_lecturas: lecturas.length
+      }
+    }) || []
 
     return NextResponse.json({
       success: true,
-      devices: devicesWithSensorData
+      devices: dispositivosConLectura
     })
 
   } catch (error) {
-    console.error('Error en my-devices:', error)
+    console.error('Error en API:', error)
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: "Error interno del servidor" },
       { status: 500 }
     )
   }
