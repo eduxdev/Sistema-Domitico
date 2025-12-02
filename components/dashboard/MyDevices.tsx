@@ -139,7 +139,6 @@ export default function MyDevices() {
   const getStatusColor = (estado: string) => {
     switch (estado) {
       case 'normal': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-      case 'precaucion': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
       case 'peligro': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
     }
@@ -148,7 +147,6 @@ export default function MyDevices() {
   const getStatusIcon = (estado: string) => {
     switch (estado) {
       case 'normal': return <ActivityLogIcon className="h-4 w-4 text-green-600" />
-      case 'precaucion': return <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600" />
       case 'peligro': return <ExclamationTriangleIcon className="h-4 w-4 text-red-600" />
       default: return <ActivityLogIcon className="h-4 w-4 text-gray-600" />
     }
@@ -427,8 +425,7 @@ export default function MyDevices() {
                                 >
                                   <div className="flex items-center gap-1">
                                     <div className={`w-1.5 h-1.5 rounded-full ${
-                                      reading.estado === 'normal' ? 'bg-green-500' :
-                                      reading.estado === 'precaucion' ? 'bg-yellow-500' : 'bg-red-500'
+                                      reading.estado === 'normal' ? 'bg-green-500' : 'bg-red-500'
                                     }`} />
                                     <span className="font-mono text-xs">
                                       {formatSensorValue(reading.valor, reading.unidad)}
@@ -503,8 +500,7 @@ export default function MyDevices() {
                               >
                                 <div className="flex items-center gap-3">
                                   <div className={`w-3 h-3 rounded-full ${
-                                    reading.estado === 'normal' ? 'bg-green-500' :
-                                    reading.estado === 'precaucion' ? 'bg-yellow-500' : 'bg-red-500'
+                                    reading.estado === 'normal' ? 'bg-green-500' : 'bg-red-500'
                                   }`} />
                                   <div>
                                     <span className="font-mono text-sm font-medium">
