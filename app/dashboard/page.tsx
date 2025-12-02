@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/dashboard/AppSidebar'
@@ -10,7 +10,7 @@ import DashboardHome from '@/components/dashboard/DashboardHome'
 import MyDevices from '@/components/dashboard/MyDevices'
 import ClaimDevices from '@/components/dashboard/ClaimDevices'
 
-export default function Dashboard() {
+function DashboardContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [activeSection, setActiveSection] = useState<string>('dashboard')
@@ -56,5 +56,13 @@ export default function Dashboard() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   )
 }
