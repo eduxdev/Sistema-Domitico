@@ -79,11 +79,6 @@ export async function POST(request: Request) {
       // Determinar estado del sensor individual
       const estadoSensor = determinarEstadoSensor(tipo, valor)
       
-      // Debug temporal: Log de valores y estados críticos
-      if (estadoSensor === 'peligro') {
-        console.log(`🚨 PELIGRO DETECTADO - ${tipo}: ${valor} ${unidad} (umbral: ${tipo === 'MQ2' ? '600' : tipo === 'MQ4' ? '150' : tipo === 'DHT11_temp' ? '35°C' : '85%'})`)
-      }
-      
       // Insertar lectura en la base de datos
       const { data: lectura, error } = await supabase
         .from('lecturas_sensores')
@@ -219,7 +214,6 @@ async function verificarAlertasConsecutivas(
 
     // Si hay alertas consecutivas suficientes, enviar notificación
     if (alertasConsecutivas >= ALERTAS_CONSECUTIVAS_REQUERIDAS) {
-      console.log(`📧 Enviando email por ${sensor.tipo}: ${sensor.valor} ${sensor.unidad} (${alertasConsecutivas} alertas consecutivas)`)
       await enviarNotificacionSensor(
         sensor,
         estadoActual,
@@ -228,8 +222,6 @@ async function verificarAlertasConsecutivas(
         dispositivo,
         lectura
       )
-    } else {
-      console.log(`⏳ ${sensor.tipo}: ${alertasConsecutivas}/${ALERTAS_CONSECUTIVAS_REQUERIDAS} alertas consecutivas (no se envía email aún)`)
     }
 
   } catch (error) {
@@ -248,8 +240,6 @@ async function enviarNotificacionSensor(
   dispositivo: Tables<'dispositivos'> & { usuarios?: { email: string; nombre: string; apellidos: string } | null },
   lecturaData: { id: number }
 ) {
-  // Parámetro lecturaData disponible pero no usado actualmente
-  console.log('Enviando notificación para lectura ID:', lecturaData.id)
   if (!USAR_EMAIL || !dispositivo.is_claimed || !dispositivo.usuarios) {
     return
   }
@@ -344,7 +334,6 @@ async function obtenerConfiguracionUsuario(usuarioEmail: string) {
       .single()
 
     if (userError || !usuario) {
-      console.log('Usuario no encontrado, usando configuración por defecto')
       return {
         email_cooldown_minutes: DEFAULT_EMAIL_COOLDOWN_MINUTES,
         max_emails_per_hour: DEFAULT_MAX_EMAILS_PER_HOUR,
@@ -361,7 +350,6 @@ async function obtenerConfiguracionUsuario(usuarioEmail: string) {
       .single()
 
     if (settingsError || !settings) {
-      console.log('Configuración no encontrada, usando valores por defecto')
       return {
         email_cooldown_minutes: DEFAULT_EMAIL_COOLDOWN_MINUTES,
         max_emails_per_hour: DEFAULT_MAX_EMAILS_PER_HOUR,
@@ -369,8 +357,6 @@ async function obtenerConfiguracionUsuario(usuarioEmail: string) {
         critical_only: false
       }
     }
-
-    console.log(`✅ Configuración cargada para ${usuarioEmail}: Cooldown ${settings.email_cooldown_minutes}min, Max ${settings.max_emails_per_hour}/hora`)
     
     return {
       email_cooldown_minutes: settings.email_cooldown_minutes ?? DEFAULT_EMAIL_COOLDOWN_MINUTES,
@@ -450,7 +436,6 @@ async function puedeEnviarEmail(deviceId: string, usuarioEmail: string): Promise
       }
     }
 
-    console.log(`✅ Cooldown OK: Último email hace ${Math.floor((ahora.getTime() - ultimoEmail.getTime()) / (60 * 1000))} minutos. Emails última hora: ${emailsUltimaHora}/${config.max_emails_per_hour}`)
     return { puede: true }
   } catch (error) {
     console.error('Error en verificación de cooldown:', error)
@@ -463,24 +448,15 @@ async function puedeEnviarEmail(deviceId: string, usuarioEmail: string): Promise
  */
 async function limpiarLecturasAntiguas() {
   try {
-    const MAX_LECTURAS_TOTALES = 50 // Límite máximo de registros en la tabla
+    const MAX_LECTURAS_TOTALES = 50
 
-    console.log('🧹 Iniciando limpieza automática de lecturas...')
-
-    // Verificar cuántas lecturas hay en total
     const { count: totalCount } = await supabase
       .from('lecturas_sensores')
       .select('*', { count: 'exact', head: true })
 
-    console.log(`📊 Total de lecturas en BD: ${totalCount}`)
-
-    // Si hay más de 50 lecturas, eliminar las más antiguas
     if (totalCount && totalCount > MAX_LECTURAS_TOTALES) {
       const lecturasAEliminar = totalCount - MAX_LECTURAS_TOTALES
       
-      console.log(`🗑️ Eliminando ${lecturasAEliminar} lecturas más antiguas...`)
-      
-      // Obtener los IDs de las lecturas más antiguas
       const { data: lecturasViejas } = await supabase
         .from('lecturas_sensores')
         .select('id')
@@ -489,23 +465,14 @@ async function limpiarLecturasAntiguas() {
 
       if (lecturasViejas && lecturasViejas.length > 0) {
         const idsAEliminar = lecturasViejas.map(l => l.id)
-        const { error: deleteError } = await supabase
+        await supabase
           .from('lecturas_sensores')
           .delete()
           .in('id', idsAEliminar)
-        
-        if (deleteError) {
-          console.error('❌ Error eliminando lecturas:', deleteError)
-        } else {
-          console.log(`✅ Limpieza completada: ${lecturasViejas.length} lecturas eliminadas. Total restante: ${MAX_LECTURAS_TOTALES}`)
-        }
       }
-    } else {
-      console.log('✅ No se requiere limpieza (menos de 50 registros)')
     }
-
   } catch (error) {
-    console.error('❌ Error en limpieza automática:', error)
+    console.error('Error en limpieza automática:', error)
   }
 }
 
