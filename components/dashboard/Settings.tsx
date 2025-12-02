@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Settings as SettingsIcon, Mail, TestTube, Bell, Clock, Shield } from 'lucide-react'
+import { Settings as SettingsIcon, Mail, Bell, Clock, Shield } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
@@ -16,7 +16,6 @@ export default function SettingsPage() {
     fullName: string;
     phoneNumber?: string;
   } | null>(null)
-  const [testingEmail, setTestingEmail] = useState(false)
   const [notificationSettings, setNotificationSettings] = useState({
     email_enabled: true,
     email_cooldown_minutes: 15,
@@ -45,33 +44,6 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error cargando configuración:', error)
-    }
-  }
-
-  const testEmail = async (tipo: 'prueba' | 'alerta') => {
-    setTestingEmail(true)
-    try {
-      const response = await fetch(`/api/alerts/email?tipo=${tipo}`, {
-        credentials: 'include'
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast.success(`Email de ${tipo} enviado exitosamente`, {
-          description: `Se envió a ${user?.email || 'tu email'}`
-        })
-      } else {
-        toast.error(`Error enviando email de ${tipo}`, {
-          description: data.error
-        })
-      }
-    } catch {
-      toast.error('Error de conexión', {
-        description: 'No se pudo conectar con el servidor'
-      })
-    } finally {
-      setTestingEmail(false)
     }
   }
 
@@ -123,35 +95,11 @@ export default function SettingsPage() {
               <Input 
                 value={user?.email || ''} 
                 disabled 
-                className="bg-gray-50"
+                className="bg-gray-50 dark:bg-gray-800"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Las alertas se envían automáticamente a tu email registrado
               </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Probar notificaciones</Label>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => testEmail('prueba')}
-                  disabled={testingEmail}
-                  className="flex-1"
-                >
-                  <TestTube className="mr-2 h-4 w-4" />
-                  Email de Prueba
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => testEmail('alerta')}
-                  disabled={testingEmail}
-                  className="flex-1"
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  Simular Alerta
-                </Button>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -170,7 +118,7 @@ export default function SettingsPage() {
                 id="name" 
                 value={user?.fullName || ''} 
                 disabled 
-                className="bg-gray-50"
+                className="bg-gray-50 dark:bg-gray-800"
               />
             </div>
             <div className="space-y-2">
@@ -179,7 +127,7 @@ export default function SettingsPage() {
                 id="email" 
                 value={user?.email || ''} 
                 disabled 
-                className="bg-gray-50"
+                className="bg-gray-50 dark:bg-gray-800"
               />
             </div>
             <div className="space-y-2">
@@ -188,11 +136,11 @@ export default function SettingsPage() {
                 id="phone" 
                 value={user?.phoneNumber || ''} 
                 disabled 
-                className="bg-gray-50"
+                className="bg-gray-50 dark:bg-gray-800"
                 placeholder="No configurado"
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Para modificar tu perfil, contacta al administrador del sistema
             </p>
           </CardContent>
@@ -215,7 +163,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-sm font-medium">Emails habilitados</Label>
-                  <p className="text-xs text-gray-500">Recibir notificaciones por email</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Recibir notificaciones por email</p>
                 </div>
                 <input
                   type="checkbox"
@@ -231,7 +179,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-sm font-medium">Solo alertas críticas</Label>
-                  <p className="text-xs text-gray-500">Recibir solo alertas de peligro</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Recibir solo alertas de peligro</p>
                 </div>
                 <input
                   type="checkbox"
@@ -248,7 +196,7 @@ export default function SettingsPage() {
             {/* Configuración de frecuencia */}
             <div className="space-y-4 pt-4 border-t">
               <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-gray-500" />
+                <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <Label className="text-sm font-medium">Control de Frecuencia</Label>
               </div>
               
@@ -269,7 +217,7 @@ export default function SettingsPage() {
                     }))}
                     className="text-sm"
                   />
-                  <p className="text-xs text-gray-500">Mínimo 5, máximo 120 minutos</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Mínimo 5, máximo 120 minutos</p>
                 </div>
 
                 <div className="space-y-2">
@@ -288,18 +236,18 @@ export default function SettingsPage() {
                     }))}
                     className="text-sm"
                   />
-                  <p className="text-xs text-gray-500">Mínimo 1, máximo 10 emails</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Mínimo 1, máximo 10 emails</p>
                 </div>
               </div>
             </div>
 
             {/* Información actual */}
-            <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg space-y-2">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">Configuración Actual</span>
+                <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Configuración Actual</span>
               </div>
-              <div className="text-xs text-blue-700 space-y-1">
+              <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
                 <p>• Emails: {notificationSettings.email_enabled ? 'Habilitados' : 'Deshabilitados'}</p>
                 <p>• Cooldown: {notificationSettings.email_cooldown_minutes} minutos entre emails</p>
                 <p>• Límite: {notificationSettings.max_emails_per_hour} emails máximo por hora</p>

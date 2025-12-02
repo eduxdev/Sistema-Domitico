@@ -1,10 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Bell, AlertTriangle, CheckCircle, Info } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
+import { CheckCircle, Info } from 'lucide-react'
 
 interface Lectura {
   id: number
@@ -28,12 +45,11 @@ export default function Alerts() {
   const [devices, setDevices] = useState<Device[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 11
 
   useEffect(() => {
     fetchData()
-    // Actualizar cada 15 segundos para alertas en tiempo real
-    const interval = setInterval(fetchData, 15000)
-    return () => clearInterval(interval)
   }, [])
 
   const fetchData = async () => {
@@ -113,29 +129,17 @@ export default function Alerts() {
     const severity = getSeverityFromEstado(estado)
     switch (severity) {
       case 'high':
-        return <Badge className="bg-red-100 text-red-800 text-xs px-2 py-0">PELIGRO</Badge>
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 text-xs px-2 py-0">PELIGRO</Badge>
       case 'medium':
-        return <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0">PRECAUCIÓN</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-xs px-2 py-0">PRECAUCIÓN</Badge>
       case 'low':
-        return <Badge className="bg-green-100 text-green-800 text-xs px-2 py-0">NORMAL</Badge>
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs px-2 py-0">NORMAL</Badge>
       default:
         return <Badge className="text-xs px-2 py-0">Sin definir</Badge>
     }
   }
 
-  const getSeverityIcon = (estado: string) => {
-    const severity = getSeverityFromEstado(estado)
-    switch (severity) {
-      case 'high':
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
-      case 'medium':
-        return <Info className="h-4 w-4 text-yellow-600" />
-      case 'low':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      default:
-        return <Bell className="h-4 w-4" />
-    }
-  }
+
 
   if (loading) {
     return (
@@ -143,38 +147,39 @@ export default function Alerts() {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold">Alertas de Mis Dispositivos</h2>
-            <p className="text-gray-500">Alertas de los dispositivos que has reclamado</p>
+            <p className="text-gray-500 dark:text-gray-400">Alertas de los dispositivos que has reclamado</p>
           </div>
           <div className="flex gap-2">
             <Skeleton className="h-6 w-24" />
             <Skeleton className="h-6 w-28" />
           </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="border-l-4">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4 rounded-full" />
-                    <div className="space-y-1">
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <Table className="[&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Dispositivo</TableHead>
+                  <TableHead>Nivel PPM</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TableRow key={i}>
+                    <TableCell>
                       <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                  </div>
-                  <Skeleton className="h-5 w-20" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-3 w-12" />
-                    <Skeleton className="h-6 w-16" />
-                  </div>
-                  <Skeleton className="h-3 w-full" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -185,10 +190,10 @@ export default function Alerts() {
         <h2 className="text-2xl font-bold">Alertas</h2>
         <Card>
           <CardContent className="p-6 text-center">
-            <p className="text-red-500">{error}</p>
+            <p className="text-red-500 dark:text-red-400">{error}</p>
             <button 
               onClick={fetchData}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="mt-2 px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700"
             >
               Reintentar
             </button>
@@ -218,9 +223,9 @@ export default function Alerts() {
       {devices.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <Info className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <p className="text-gray-500 mb-2">No tienes dispositivos reclamados</p>
-            <p className="text-sm text-gray-400">
+            <Info className="h-12 w-12 text-blue-500 dark:text-blue-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 mb-2">No tienes dispositivos reclamados</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
               Ve a &quot;Reclamar Dispositivo&quot; para agregar dispositivos y ver sus alertas aquí.
             </p>
           </CardContent>
@@ -228,70 +233,145 @@ export default function Alerts() {
       ) : lecturas.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <p className="text-gray-500 mb-2">No hay alertas activas</p>
-            <p className="text-sm text-gray-400">
+            <CheckCircle className="h-12 w-12 text-green-500 dark:text-green-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 mb-2">No hay alertas activas</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
               Todos tus dispositivos están funcionando normalmente. Las alertas aparecerán aquí cuando se detecten niveles elevados de gas.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {lecturas.map((lectura) => {
-            const severity = getSeverityFromEstado(lectura.estado)
-            return (
-              <Card
-                key={lectura.id}
-                className={`border-l-4 hover:shadow-md transition-shadow ${
-                  severity === 'high'
-                    ? 'border-red-500'
-                    : severity === 'medium'
-                    ? 'border-yellow-500'
-                    : 'border-green-500'
-                }`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {getSeverityIcon(lectura.estado)}
-                      <div>
-                        <h3 className="font-semibold text-sm">
-                          {lectura.device_name || lectura.sensor_nombre || 'Sensor Principal'}
-                        </h3>
-                        <p className="text-xs text-gray-500 font-mono">
-                          {lectura.device_id}
-                        </p>
-                      </div>
-                    </div>
-                    {getSeverityBadge(lectura.estado)}
-                  </div>
+        <>
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <Table className="[&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Dispositivo</TableHead>
+                    <TableHead>Nivel PPM</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lecturas
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((lectura) => {
+                      const severity = getSeverityFromEstado(lectura.estado)
+                      return (
+                        <TableRow key={lectura.id}>
+                          {/* Dispositivo */}
+                          <TableCell>
+                            <span className="font-medium text-sm">
+                              {lectura.device_name || lectura.sensor_nombre || 'Sensor Principal'}
+                            </span>
+                          </TableCell>
+
+                          {/* Nivel PPM */}
+                          <TableCell>
+                            <span className="font-semibold text-sm">{lectura.valor_ppm} PPM</span>
+                          </TableCell>
+
+                          {/* Fecha */}
+                          <TableCell>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <div>{new Date(lectura.created_at).toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                              })}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-500">
+                                {new Date(lectura.created_at).toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          {/* Estado */}
+                          <TableCell>
+                            {getSeverityBadge(lectura.estado)}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Paginación */}
+          {lecturas.length > itemsPerPage && (
+            <Pagination className="mt-6">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (currentPage > 1) setCurrentPage(currentPage - 1)
+                    }}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+
+                {Array.from({ length: Math.ceil(lecturas.length / itemsPerPage) }, (_, i) => i + 1).map((page) => {
+                  const totalPages = Math.ceil(lecturas.length / itemsPerPage)
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-600">Nivel:</span>
-                      <span className="font-bold text-lg">{lectura.valor_ppm} PPM</span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{new Date(lectura.created_at).toLocaleString('es-ES', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}</span>
-                      {lectura.estado === 'peligro' && (
-                        <span className="text-red-600 font-medium">🚨 Urgente</span>
-                      )}
-                      {lectura.estado === 'precaucion' && (
-                        <span className="text-yellow-600 font-medium">⚠️ Atención</span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                  // Mostrar solo algunas páginas
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setCurrentPage(page)
+                          }}
+                          isActive={currentPage === page}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  } else if (
+                    page === currentPage - 2 ||
+                    page === currentPage + 2
+                  ) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )
+                  }
+                  return null
+                })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (currentPage < Math.ceil(lecturas.length / itemsPerPage)) {
+                        setCurrentPage(currentPage + 1)
+                      }
+                    }}
+                    className={
+                      currentPage === Math.ceil(lecturas.length / itemsPerPage)
+                        ? 'pointer-events-none opacity-50'
+                        : ''
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
     </div>
   )

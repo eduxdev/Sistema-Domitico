@@ -8,14 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { 
-  Smartphone, 
-  Plus, 
-  Wifi, 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle,
-  RefreshCw 
-} from 'lucide-react'
+  MobileIcon,
+  PlusIcon,
+  SymbolIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
+  ReloadIcon
+} from '@radix-ui/react-icons'
 import { useToast } from '@/hooks/use-toast'
 
 interface AvailableDevice {
@@ -143,7 +142,7 @@ export default function ClaimDevices() {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold">Reclamar Dispositivo</h2>
-            <p className="text-gray-500">Dispositivos disponibles para reclamar</p>
+            <p className="text-gray-500 dark:text-gray-400">Dispositivos disponibles para reclamar</p>
           </div>
           <Skeleton className="h-9 w-24" />
         </div>
@@ -187,8 +186,8 @@ export default function ClaimDevices() {
         </div>
         <Card>
           <CardContent className="flex flex-col items-center justify-center h-64">
-            <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-            <p className="text-red-600 mb-4">{error}</p>
+            <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mb-4" />
+            <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
             <Button onClick={fetchAvailableDevices} variant="outline">
               Reintentar
             </Button>
@@ -203,7 +202,7 @@ export default function ClaimDevices() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Reclamar Dispositivo</h2>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             Dispositivos disponibles para reclamar ({availableDevices.length})
           </p>
         </div>
@@ -213,7 +212,7 @@ export default function ClaimDevices() {
           size="sm"
           disabled={loading}
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <ReloadIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
       </div>
@@ -221,11 +220,11 @@ export default function ClaimDevices() {
       {availableDevices.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center h-64">
-            <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+            <MobileIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">
               No hay dispositivos disponibles
             </h3>
-            <p className="text-gray-500 text-center mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
               Todos los dispositivos registrados ya han sido reclamados o no hay dispositivos conectados.
             </p>
             <Button onClick={fetchAvailableDevices} variant="outline">
@@ -240,14 +239,14 @@ export default function ClaimDevices() {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Smartphone className="h-5 w-5" />
+                    <MobileIcon className="h-5 w-5" />
                     {device.nombre}
                   </CardTitle>
-                  <Badge variant="outline" className="text-green-600 border-green-600">
+                  <Badge variant="outline" className="text-green-600 border-green-600 dark:text-green-400 dark:border-green-500">
                     Disponible
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-500 font-mono">{device.device_id}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{device.device_id}</p>
               </CardHeader>
               
               <CardContent className="space-y-4">
@@ -259,12 +258,12 @@ export default function ClaimDevices() {
                   </div>
                   {device.ip_address && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Wifi className="h-4 w-4 text-gray-400" />
+                      <SymbolIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       <span className="font-mono text-xs">{device.ip_address}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <Clock className="h-3 w-3" />
+                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <ClockIcon className="h-3 w-3" />
                     Registrado: {new Date(device.created_at).toLocaleDateString('es-ES')}
                   </div>
                 </div>
@@ -304,12 +303,12 @@ export default function ClaimDevices() {
                   >
                     {claiming === device.device_id ? (
                       <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        <ReloadIcon className="h-4 w-4 mr-2 animate-spin" />
                         Reclamando...
                       </>
                     ) : (
                       <>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <PlusIcon className="h-4 w-4 mr-2" />
                         Reclamar Dispositivo
                       </>
                     )}
