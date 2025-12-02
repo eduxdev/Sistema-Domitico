@@ -129,8 +129,6 @@ export default function MultiSensorAlerts() {
     switch (estado) {
       case 'peligro':
         return 'bg-red-500 text-white'
-      case 'precaucion':
-        return 'bg-yellow-500 text-white'
       default:
         return 'bg-gray-500 text-white'
     }
@@ -140,8 +138,6 @@ export default function MultiSensorAlerts() {
     switch (estado) {
       case 'peligro':
         return <ExclamationTriangleIcon className="h-4 w-4" />
-      case 'precaucion':
-        return <ClockIcon className="h-4 w-4" />
       default:
         return <CheckCircledIcon className="h-4 w-4" />
     }
@@ -297,24 +293,18 @@ export default function MultiSensorAlerts() {
           <CardTitle className="text-lg">Resumen de Alertas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="text-center p-3 bg-red-50 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
                 {alerts.filter(a => a.estado === 'peligro').length}
               </div>
-              <div className="text-sm text-red-600">Peligro</div>
-            </div>
-            <div className="text-center p-3 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
-                {alerts.filter(a => a.estado === 'precaucion').length}
-              </div>
-              <div className="text-sm text-yellow-600">Precaución</div>
+              <div className="text-sm text-red-600">Alertas de Peligro</div>
             </div>
             <div className="text-center p-3 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">
                 {devices.length}
               </div>
-              <div className="text-sm text-blue-600">Dispositivos</div>
+              <div className="text-sm text-blue-600">Dispositivos Activos</div>
             </div>
           </div>
         </CardContent>
