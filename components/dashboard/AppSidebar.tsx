@@ -10,19 +10,20 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { 
   Home, 
   Package, 
-  PlusCircle, 
   Bell, 
   Settings,
   LogOut,
   Smartphone,
   Plus
 } from 'lucide-react'
+import { MoonIcon, SunIcon } from '@radix-ui/react-icons'
+import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface AppSidebarProps {
   activeSection: string
@@ -31,11 +32,23 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    // Usar setTimeout para evitar el warning de setState síncrono
+    const timer = setTimeout(() => setMounted(true), 0)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleLogout = () => {
     // Eliminar cookie de autenticación
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
     router.push('/auth')
+  }
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   const menuItems = [
@@ -84,7 +97,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
   return (
     <Sidebar>
       <SidebarHeader className="flex h-16 shrink-0 items-center border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2">
+        <div className="flex items-center gap-2 w-full justify-center">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Package className="h-4 w-4" />
           </div>
@@ -121,20 +134,28 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           </SidebarGroup>
         ))}
 
-        <SidebarGroup className="mt-auto border-t border-sidebar-border">
+        <SidebarGroup className="mt-auto pb-2">
           <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={handleLogout}
-                  variant="outline"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <LogOut />
-                  <span>Cerrar Sesión</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
+            <div className="grid grid-cols-2 gap-2 px-2">
+              <button
+                onClick={toggleTheme}
+                className="flex h-10 items-center justify-center rounded-lg hover:bg-sidebar-accent transition-colors"
+                title={mounted ? (theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro') : 'Cambiar Tema'}
+              >
+                {mounted && theme === 'dark' ? (
+                  <SunIcon className="h-5 w-5" />
+                ) : (
+                  <MoonIcon className="h-5 w-5" />
+                )}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex h-10 items-center justify-center rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50/50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50 transition-colors"
+                title="Cerrar Sesión"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
