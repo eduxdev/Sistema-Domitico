@@ -12,22 +12,50 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    // Configuración por defecto
-    const defaultSettings = {
-      email_enabled: true,
-      email_cooldown_minutes: 15,
-      max_emails_per_hour: 4,
-      critical_only: false,
-      quiet_hours_enabled: false,
-      quiet_hours_start: "22:00",
-      quiet_hours_end: "07:00"
+    // Buscar configuración del usuario en la base de datos
+    const { data: settings, error } = await supabase
+      .from('user_notification_settings')
+      .select('*')
+      .eq('user_id', authResult.userId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+      console.error('Error obteniendo configuración:', error)
+      return NextResponse.json(
+        { error: "Error al obtener configuración" },
+        { status: 500 }
+      )
     }
 
-    // TODO: En el futuro, obtener de una tabla de configuración de usuario
-    // Por ahora, devolver configuración por defecto
+    // Si no existe configuración, devolver valores por defecto
+    if (!settings) {
+      const defaultSettings = {
+        email_enabled: true,
+        email_cooldown_minutes: 5,
+        max_emails_per_hour: 10,
+        critical_only: false,
+        quiet_hours_enabled: false,
+        quiet_hours_start: "22:00",
+        quiet_hours_end: "07:00"
+      }
+
+      return NextResponse.json({
+        success: true,
+        settings: defaultSettings
+      })
+    }
+
     return NextResponse.json({
       success: true,
-      settings: defaultSettings
+      settings: {
+        email_enabled: settings.email_enabled,
+        email_cooldown_minutes: settings.email_cooldown_minutes,
+        max_emails_per_hour: settings.max_emails_per_hour,
+        critical_only: settings.critical_only,
+        quiet_hours_enabled: settings.quiet_hours_enabled,
+        quiet_hours_start: settings.quiet_hours_start,
+        quiet_hours_end: settings.quiet_hours_end
+      }
     })
 
   } catch (error) {
@@ -75,20 +103,46 @@ export async function POST(request: Request) {
       )
     }
 
-    // TODO: En el futuro, guardar en tabla de configuración de usuario
-    // Por ahora, solo validar y devolver éxito
-    
+    // Preparar datos para guardar
+    const settingsData = {
+      user_id: authResult.userId,
+      email_enabled: email_enabled ?? true,
+      email_cooldown_minutes: email_cooldown_minutes ?? 5,
+      max_emails_per_hour: max_emails_per_hour ?? 10,
+      critical_only: critical_only ?? false,
+      quiet_hours_enabled: quiet_hours_enabled ?? false,
+      quiet_hours_start: quiet_hours_start ?? "22:00",
+      quiet_hours_end: quiet_hours_end ?? "07:00"
+    }
+
+    // Usar upsert para insertar o actualizar
+    const { data, error } = await supabase
+      .from('user_notification_settings')
+      .upsert(settingsData, {
+        onConflict: 'user_id'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error guardando configuración:', error)
+      return NextResponse.json(
+        { error: "Error al guardar configuración" },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
       message: "Configuración actualizada correctamente",
       settings: {
-        email_enabled: email_enabled ?? true,
-        email_cooldown_minutes: email_cooldown_minutes ?? 15,
-        max_emails_per_hour: max_emails_per_hour ?? 4,
-        critical_only: critical_only ?? false,
-        quiet_hours_enabled: quiet_hours_enabled ?? false,
-        quiet_hours_start: quiet_hours_start ?? "22:00",
-        quiet_hours_end: quiet_hours_end ?? "07:00"
+        email_enabled: data.email_enabled,
+        email_cooldown_minutes: data.email_cooldown_minutes,
+        max_emails_per_hour: data.max_emails_per_hour,
+        critical_only: data.critical_only,
+        quiet_hours_enabled: data.quiet_hours_enabled,
+        quiet_hours_start: data.quiet_hours_start,
+        quiet_hours_end: data.quiet_hours_end
       }
     })
 

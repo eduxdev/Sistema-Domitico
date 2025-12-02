@@ -26,6 +26,7 @@ export type Database = {
           is_claimed: boolean | null
           mac_address: string | null
           nombre: string
+          sensores_activos: Json | null
           tipo: string | null
           ubicacion: string | null
           updated_at: string | null
@@ -41,6 +42,7 @@ export type Database = {
           is_claimed?: boolean | null
           mac_address?: string | null
           nombre: string
+          sensores_activos?: Json | null
           tipo?: string | null
           ubicacion?: string | null
           updated_at?: string | null
@@ -56,6 +58,7 @@ export type Database = {
           is_claimed?: boolean | null
           mac_address?: string | null
           nombre?: string
+          sensores_activos?: Json | null
           tipo?: string | null
           ubicacion?: string | null
           updated_at?: string | null
@@ -137,6 +140,47 @@ export type Database = {
           valor_ppm?: number
         }
         Relationships: []
+      }
+      lecturas_sensores: {
+        Row: {
+          created_at: string | null
+          device_id: string | null
+          estado: string
+          id: number
+          sensor_nombre: string | null
+          sensor_tipo: string
+          unidad: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          device_id?: string | null
+          estado: string
+          id?: number
+          sensor_nombre?: string | null
+          sensor_tipo: string
+          unidad: string
+          valor: number
+        }
+        Update: {
+          created_at?: string | null
+          device_id?: string | null
+          estado?: string
+          id?: number
+          sensor_nombre?: string | null
+          sensor_tipo?: string
+          unidad?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecturas_sensores_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["device_id"]
+          },
+        ]
       }
       notificaciones_enviadas: {
         Row: {
@@ -229,6 +273,56 @@ export type Database = {
           total_lecturas?: number | null
         }
         Relationships: []
+      }
+      user_notification_settings: {
+        Row: {
+          created_at: string | null
+          critical_only: boolean | null
+          email_cooldown_minutes: number | null
+          email_enabled: boolean | null
+          id: string
+          max_emails_per_hour: number | null
+          quiet_hours_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          critical_only?: boolean | null
+          email_cooldown_minutes?: number | null
+          email_enabled?: boolean | null
+          id?: string
+          max_emails_per_hour?: number | null
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          critical_only?: boolean | null
+          email_cooldown_minutes?: number | null
+          email_enabled?: boolean | null
+          id?: string
+          max_emails_per_hour?: number | null
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuarios: {
         Row: {

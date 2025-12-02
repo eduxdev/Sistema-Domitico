@@ -17,18 +17,10 @@ export async function GET(request: Request) {
       )
     }
 
-    // Obtener dispositivos del usuario con última lectura
+    // Obtener dispositivos del usuario
     const { data: dispositivos, error } = await supabase
       .from('dispositivos')
-      .select(`
-        *,
-        lecturas_gas!lecturas_gas_device_id_fkey (
-          id,
-          valor_ppm,
-          estado,
-          created_at
-        )
-      `)
+      .select('*')
       .eq('claimed_by', user.userId)
       .eq('is_claimed', true)
       .order('created_at', { ascending: false })
@@ -41,21 +33,9 @@ export async function GET(request: Request) {
       )
     }
 
-    // Procesar datos para incluir última lectura
-    const dispositivosConLectura = dispositivos?.map(dispositivo => {
-      const lecturas = dispositivo.lecturas_gas || []
-      const ultimaLectura = lecturas.length > 0 ? lecturas[0] : null
-      
-      return {
-        ...dispositivo,
-        ultima_lectura: ultimaLectura,
-        total_lecturas: lecturas.length
-      }
-    }) || []
-
     return NextResponse.json({
       success: true,
-      devices: dispositivosConLectura
+      data: dispositivos || []
     })
 
   } catch (error) {
