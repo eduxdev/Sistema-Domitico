@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { device_id, nombre, tipo, mac_address, ip_address } = body
+    const { device_id, nombre, tipo, mac_address, ip_address, sensores_activos } = body
 
     // Validar que venga el device_id
     if (!device_id) {
@@ -26,12 +26,13 @@ export async function POST(request: Request) {
       .single()
 
     if (existingDevice) {
-      // Actualizar IP y MAC si cambió
+      // Actualizar IP, MAC y sensores activos si cambió
       const { error: updateError } = await supabase
         .from('dispositivos')
         .update({
           ip_address: ip_address,
           mac_address: mac_address,
+          sensores_activos: sensores_activos || existingDevice.sensores_activos,
           updated_at: new Date().toISOString()
         })
         .eq('device_id', device_id)
@@ -55,9 +56,10 @@ export async function POST(request: Request) {
         {
           device_id,
           nombre: nombre || `Dispositivo ${device_id}`,
-          tipo: tipo || 'sensor_gas',
+          tipo: tipo || 'multi_sensor',
           mac_address,
           ip_address,
+          sensores_activos: sensores_activos || ['MQ2'],
           is_claimed: false
         }
       ])

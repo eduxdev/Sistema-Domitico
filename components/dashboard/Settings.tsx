@@ -18,10 +18,12 @@ export default function SettingsPage() {
   } | null>(null)
   const [notificationSettings, setNotificationSettings] = useState({
     email_enabled: true,
-    email_cooldown_minutes: 15,
-    max_emails_per_hour: 4,
+    email_cooldown_minutes: 5,
+    max_emails_per_hour: 10,
     critical_only: false
   })
+  const [tempCooldown, setTempCooldown] = useState<string>('5')
+  const [tempMaxEmails, setTempMaxEmails] = useState<string>('10')
   const [savingSettings, setSavingSettings] = useState(false)
 
   useEffect(() => {
@@ -41,6 +43,8 @@ export default function SettingsPage() {
       const data = await response.json()
       if (data.success) {
         setNotificationSettings(data.settings)
+        setTempCooldown(String(data.settings.email_cooldown_minutes))
+        setTempMaxEmails(String(data.settings.max_emails_per_hour))
       }
     } catch (error) {
       console.error('Error cargando configuración:', error)
@@ -210,11 +214,28 @@ export default function SettingsPage() {
                     type="number"
                     min="5"
                     max="120"
-                    value={notificationSettings.email_cooldown_minutes}
-                    onChange={(e) => setNotificationSettings(prev => ({
-                      ...prev,
-                      email_cooldown_minutes: parseInt(e.target.value) || 15
-                    }))}
+                    value={tempCooldown}
+                    onChange={(e) => {
+                      setTempCooldown(e.target.value)
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value
+                      if (value === '' || isNaN(parseInt(value))) {
+                        setTempCooldown('5')
+                        setNotificationSettings(prev => ({
+                          ...prev,
+                          email_cooldown_minutes: 5
+                        }))
+                      } else {
+                        const numValue = parseInt(value)
+                        const clampedValue = Math.min(Math.max(numValue, 5), 120)
+                        setTempCooldown(String(clampedValue))
+                        setNotificationSettings(prev => ({
+                          ...prev,
+                          email_cooldown_minutes: clampedValue
+                        }))
+                      }
+                    }}
                     className="text-sm"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400">Mínimo 5, máximo 120 minutos</p>
@@ -229,11 +250,28 @@ export default function SettingsPage() {
                     type="number"
                     min="1"
                     max="10"
-                    value={notificationSettings.max_emails_per_hour}
-                    onChange={(e) => setNotificationSettings(prev => ({
-                      ...prev,
-                      max_emails_per_hour: parseInt(e.target.value) || 4
-                    }))}
+                    value={tempMaxEmails}
+                    onChange={(e) => {
+                      setTempMaxEmails(e.target.value)
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value
+                      if (value === '' || isNaN(parseInt(value))) {
+                        setTempMaxEmails('1')
+                        setNotificationSettings(prev => ({
+                          ...prev,
+                          max_emails_per_hour: 1
+                        }))
+                      } else {
+                        const numValue = parseInt(value)
+                        const clampedValue = Math.min(Math.max(numValue, 1), 10)
+                        setTempMaxEmails(String(clampedValue))
+                        setNotificationSettings(prev => ({
+                          ...prev,
+                          max_emails_per_hour: clampedValue
+                        }))
+                      }
+                    }}
                     className="text-sm"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400">Mínimo 1, máximo 10 emails</p>

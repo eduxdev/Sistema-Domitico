@@ -10,13 +10,16 @@ export default function DashboardHome() {
     totalLecturas: 0,
     ultimaLectura: null as {
       id: number;
-      valor_ppm: number;
+      sensor_tipo: string;
+      valor: number;
+      unidad: string;
       estado: string;
       sensor_nombre: string;
       created_at: string;
     } | null,
     alertasActivas: 0,
     sistemaOperativo: true,
+    sensoresPorTipo: {} as { [key: string]: number }
   })
   const [loading, setLoading] = useState(true)
 
@@ -29,18 +32,73 @@ export default function DashboardHome() {
 
   const fetchStats = async () => {
     try {
-      // Obtener últimas lecturas
-      const lecturas = await fetch('/api/sensor/data?limit=10')
-      const lecturasData = await lecturas.json()
+      // Primero obtener dispositivos reclamados por el usuario
+      const devicesResponse = await fetch('/api/devices/my-devices')
+      const devicesData = await devicesResponse.json()
+      
+      if (!devicesData.success || !devicesData.data || devicesData.data.length === 0) {
+        // Si no hay dispositivos reclamados, mostrar estadísticas vacías
+        setStats({
+          totalLecturas: 0,
+          ultimaLectura: null,
+          alertasActivas: 0,
+          sistemaOperativo: true,
+          sensoresPorTipo: {}
+        })
+        return
+      }
+
+      // Obtener lecturas solo de dispositivos reclamados
+      const allReadings: Array<{
+        id: number;
+        sensor_tipo: string;
+        valor: number;
+        unidad: string;
+        estado: string;
+        sensor_nombre: string;
+        created_at: string;
+      }> = []
+      const sensoresPorTipo: { [key: string]: number } = {}
+
+      for (const device of devicesData.data) {
+        try {
+          const readingsResponse = await fetch(`/api/sensor/multi-data?device_id=${device.device_id}&limit=20`)
+          if (readingsResponse.ok) {
+            const readingsData = await readingsResponse.json()
+            if (readingsData.success && readingsData.data) {
+              allReadings.push(...readingsData.data)
+              
+              // Contar sensores por tipo
+              readingsData.data.forEach((lectura: { sensor_tipo: string }) => {
+                sensoresPorTipo[lectura.sensor_tipo] = (sensoresPorTipo[lectura.sensor_tipo] || 0) + 1
+              })
+            }
+          }
+        } catch (err) {
+          console.error(`Error obteniendo lecturas para ${device.device_id}:`, err)
+        }
+      }
+
+      // Ordenar por fecha más reciente
+      allReadings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       
       setStats({
-        totalLecturas: lecturasData.data?.length || 0,
-        ultimaLectura: lecturasData.data?.[0] || null,
-        alertasActivas: lecturasData.data?.filter((l: { estado: string }) => l.estado !== 'normal').length || 0,
+        totalLecturas: allReadings.length,
+        ultimaLectura: allReadings[0] || null,
+        alertasActivas: allReadings.filter((l: { estado: string }) => l.estado !== 'normal').length,
         sistemaOperativo: true,
+        sensoresPorTipo
       })
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error)
+      // En caso de error, mostrar estadísticas vacías
+      setStats({
+        totalLecturas: 0,
+        ultimaLectura: null,
+        alertasActivas: 0,
+        sistemaOperativo: true,
+        sensoresPorTipo: {}
+      })
     } finally {
       setLoading(false)
     }
@@ -49,8 +107,8 @@ export default function DashboardHome() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Dashboard</h2>
-        <p className="text-gray-500">Resumen de tu sistema domótico</p>
+        <h2 className="text-2xl font-bold">Dashboard Multi-Sensor</h2>
+        <p className="text-gray-500">Resumen de tu sistema de monitoreo ambiental</p>
       </div>
 
       {/* Tarjetas de estadísticas */}
@@ -70,7 +128,7 @@ export default function DashboardHome() {
               <>
                 <div className="text-2xl font-bold">{stats.totalLecturas}</div>
                 <p className="text-xs text-muted-foreground">
-                  Últimas 10 lecturas
+                  De tus dispositivos
                 </p>
               </>
             )}
@@ -91,10 +149,10 @@ export default function DashboardHome() {
             ) : (
               <>
                 <div className={`text-2xl font-bold ${stats.ultimaLectura?.estado === 'normal' ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {stats.ultimaLectura?.valor_ppm || 'N/A'}
+                  {stats.ultimaLectura?.valor || 'N/A'}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.ultimaLectura?.estado?.toUpperCase() || 'Sin datos'} PPM
+                  {stats.ultimaLectura?.estado?.toUpperCase() || 'Sin datos'} {stats.ultimaLectura?.unidad || ''}
                 </p>
               </>
             )}
@@ -140,7 +198,7 @@ export default function DashboardHome() {
               <>
                 <div className="text-2xl font-bold text-green-600">Operativo</div>
                 <p className="text-xs text-muted-foreground">
-                  Sensor funcionando correctamente
+                  Sensores funcionando correctamente
                 </p>
               </>
             )}
@@ -177,13 +235,13 @@ export default function DashboardHome() {
       ) : stats.ultimaLectura && (
         <Card>
           <CardHeader>
-            <CardTitle>Última Lectura del Sensor</CardTitle>
+            <CardTitle>Última Lectura Multi-Sensor</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
               <div className="text-center">
-                <p className="text-sm text-gray-500">Valor PPM</p>
-                <p className="text-2xl font-bold">{stats.ultimaLectura.valor_ppm}</p>
+                <p className="text-sm text-gray-500">Valor</p>
+                <p className="text-2xl font-bold">{stats.ultimaLectura.valor} {stats.ultimaLectura.unidad}</p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-500">Estado</p>
@@ -195,6 +253,10 @@ export default function DashboardHome() {
                 </p>
               </div>
               <div className="text-center">
+                <p className="text-sm text-gray-500">Tipo</p>
+                <p className="text-lg font-medium">{stats.ultimaLectura.sensor_tipo}</p>
+              </div>
+              <div className="text-center">
                 <p className="text-sm text-gray-500">Sensor</p>
                 <p className="text-lg font-medium">{stats.ultimaLectura.sensor_nombre || 'Principal'}</p>
               </div>
@@ -202,6 +264,43 @@ export default function DashboardHome() {
             <div className="mt-4 pt-4 border-t">
               <p className="text-xs text-gray-500">
                 Última actualización: {new Date(stats.ultimaLectura.created_at).toLocaleString('es-ES')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resumen por tipo de sensor */}
+      {!loading && Object.keys(stats.sensoresPorTipo).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Resumen por Tipo de Sensor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4">
+              {Object.entries(stats.sensoresPorTipo).map(([tipo, cantidad]) => (
+                <div key={tipo} className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-500 mb-1">{tipo}</p>
+                  <p className="text-xl font-bold text-blue-600">{cantidad}</p>
+                  <p className="text-xs text-gray-400">lecturas</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Mensaje cuando no hay dispositivos reclamados */}
+      {!loading && stats.totalLecturas === 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No tienes dispositivos reclamados
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Para ver estadísticas y lecturas, primero debes reclamar un dispositivo en la sección &quot;Reclamar Dispositivo&quot;.
               </p>
             </div>
           </CardContent>

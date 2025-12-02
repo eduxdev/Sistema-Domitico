@@ -13,9 +13,24 @@ import {
   SymbolIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  ReloadIcon
+  ReloadIcon,
+  ComponentInstanceIcon
 } from '@radix-ui/react-icons'
 import { useToast } from '@/hooks/use-toast'
+
+const SENSOR_ICONS = {
+  MQ2: '🔥',
+  MQ4: '☠️', 
+  DHT11_temp: '🌡️',
+  DHT11_hum: '💧'
+}
+
+const SENSOR_NAMES = {
+  MQ2: 'Gas',
+  MQ4: 'Monóxido de Carbono',
+  DHT11_temp: 'Temperatura', 
+  DHT11_hum: 'Humedad'
+}
 
 interface AvailableDevice {
   id: string
@@ -25,6 +40,7 @@ interface AvailableDevice {
   mac_address?: string
   ip_address?: string
   created_at: string
+  sensores_activos?: string[]
 }
 
 interface ClaimForm {
@@ -93,7 +109,7 @@ export default function ClaimDevices() {
         },
         body: JSON.stringify({
           device_id: deviceId,
-          nickname: form.nickname.trim(),
+          nombre_personalizado: form.nickname.trim(),
           ubicacion: form.ubicacion.trim() || null
         })
       })
@@ -256,6 +272,27 @@ export default function ClaimDevices() {
                     <span className="font-medium">Tipo:</span>
                     <span className="capitalize">{device.tipo.replace('_', ' ')}</span>
                   </div>
+                  
+                  {/* Sensores activos */}
+                  {device.sensores_activos && device.sensores_activos.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <ComponentInstanceIcon className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">Sensores:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 ml-6">
+                        {device.sensores_activos.map((sensor) => (
+                          <Badge key={sensor} variant="outline" className="text-xs">
+                            <span className="mr-1">
+                              {SENSOR_ICONS[sensor as keyof typeof SENSOR_ICONS] || '📊'}
+                            </span>
+                            {SENSOR_NAMES[sensor as keyof typeof SENSOR_NAMES] || sensor}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
                   {device.ip_address && (
                     <div className="flex items-center gap-2 text-sm">
                       <SymbolIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
